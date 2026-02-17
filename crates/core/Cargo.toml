@@ -1,0 +1,15 @@
+[package]
+name = "grid-challenge-core"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1"
+geo = "0.32"
+geo-types = "0.7"
+gpx = "0.10"
+reqwest = { version = "0.13", features = ["form", "json"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+time = "0.3"
+tokio = { version = "1", features = ["time"] }

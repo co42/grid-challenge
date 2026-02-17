@@ -1,0 +1,26 @@
+[package]
+name = "grid-challenge-server"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+grid-challenge-core = { path = "../core" }
+
+anyhow = "1.0"
+argon2 = "0.5"
+geo = "0.32"
+geo-types = "0.7"
+axum = { version = "0.8", features = ["multipart"] }
+rand = "0.9"
+reqwest = { version = "0.13", features = ["form", "json"] }
+rusqlite = { version = "0.37", features = ["bundled"] }  # pinned: tower-sessions-rusqlite-store 0.14 requires ^0.37
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+time = "0.3"
+tokio = { version = "1", features = ["full"] }
+tokio-stream = "0.1"
+tokio-rusqlite = "0.7"
+tower = "0.5"
+tower-http = { version = "0.6", features = ["cors", "fs"] }
+tower-sessions = "0.14"
+tower-sessions-rusqlite-store = "0.14"

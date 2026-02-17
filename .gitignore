@@ -1,0 +1,7 @@
+/target
+/data
+/web/dist
+/web/node_modules
+*.db
+PLAN.md
+.env
