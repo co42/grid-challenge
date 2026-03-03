@@ -5,6 +5,9 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   envDir: '..',
   plugins: [svelte(), tailwindcss()],
+  build: {
+    chunkSizeWarningLimit: 1500,
+  },
   server: {
     proxy: {
       '/api': {
