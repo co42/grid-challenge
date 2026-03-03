@@ -120,6 +120,8 @@ jobs:
           FIRST_TAG=""
           while IFS= read -r TAG; do
             [ -z "$TAG" ] && continue
+            # Skip latest — no arch-suffixed images exist for it
+            [[ "$TAG" == *:latest ]] && continue
             docker buildx imagetools create -t "$TAG" \
               "${TAG}-amd64" "${TAG}-arm64"
             [ -z "$FIRST_TAG" ] && FIRST_TAG="$TAG"
