@@ -114,13 +114,18 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
 
       - name: Create multi-arch manifests
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
         run: |
-          for TAG in ${{ steps.meta.outputs.tags }}; do
+          FIRST_TAG=""
+          while IFS= read -r TAG; do
+            [ -z "$TAG" ] && continue
             docker buildx imagetools create -t "$TAG" \
               "${TAG}-amd64" "${TAG}-arm64"
-          done
+            [ -z "$FIRST_TAG" ] && FIRST_TAG="$TAG"
+          done <<< "$TAGS"
           docker buildx imagetools create -t "${{ env.IMAGE }}:latest" \
-            $(echo "${{ steps.meta.outputs.tags }}" | head -1 | xargs -I{} echo "{}-amd64" "{}-arm64")
+            "${FIRST_TAG}-amd64" "${FIRST_TAG}-arm64"
 
   release:
     needs: docker-manifest
