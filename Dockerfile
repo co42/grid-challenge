@@ -8,7 +8,7 @@ COPY web/ ./
 RUN npm run build
 
 # Stage 2: Build backend
-FROM rust:1.85-alpine AS backend
+FROM rust:1-alpine AS backend
 RUN apk add --no-cache musl-dev
 WORKDIR /app
 COPY Cargo.toml Cargo.lock ./
@@ -17,7 +17,7 @@ COPY migrations/ migrations/
 RUN cargo build --release --package grid-challenge-server
 
 # Stage 3: Runtime
-FROM alpine:3.21
+FROM alpine:3
 RUN apk add --no-cache ca-certificates
 WORKDIR /app
 
