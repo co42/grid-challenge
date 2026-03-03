@@ -53,7 +53,7 @@ check:
 	cargo fmt --all -- --check
 	cargo clippy --workspace -- -D warnings
 	cargo test --workspace
-	cd web && npx eslint src/
+	cd web && npx eslint --max-warnings 0 src/
 	cd web && npx prettier --check 'src/**/*.{js,svelte}'
 	cd web && npx vite build --logLevel error
 

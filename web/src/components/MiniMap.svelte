@@ -12,7 +12,6 @@
   let { polygon = null, track = null, className = '', width = 80, height = 80 } = $props();
 
   let container = $state();
-  let map = $state();
   let ready = $state(false);
 
   $effect(() => {
@@ -110,8 +109,6 @@
         ready = true;
       }
     });
-
-    map = m;
 
     return () => {
       m.remove();
