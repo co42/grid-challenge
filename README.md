@@ -47,7 +47,17 @@ make dev-frontend  # vite on :5173
 
 ### Configuration
 
-Copy [`.env.example`](.env.example) to `.env` and fill in values. Strava credentials are optional.
+Copy [`.env.example`](.env.example) to `.env` and fill in values.
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `PORT` | No | Server port (default: 3000) |
+| `MAPTILER_KEY` | Yes | MapTiler API key for map tiles |
+| `INSECURE_COOKIES` | No | Set to `true` for plain HTTP (cookies default to Secure) |
+| `STRAVA_CLIENT_ID` | No | Strava OAuth — all four required together |
+| `STRAVA_CLIENT_SECRET` | No | |
+| `STRAVA_REDIRECT_URI` | No | |
+| `STRAVA_WEBHOOK_VERIFY_TOKEN` | No | |
 
 ## Architecture
 

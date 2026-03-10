@@ -28,8 +28,10 @@ async fn main() -> anyhow::Result<()> {
     let session_store = RusqliteStore::new(session_conn);
     session_store.migrate().await?;
 
+    let insecure_cookies = std::env::var("INSECURE_COOKIES").is_ok_and(|v| v == "true");
     let session_layer = SessionManagerLayer::new(session_store)
         .with_same_site(SameSite::Lax)
+        .with_secure(!insecure_cookies)
         .with_expiry(Expiry::OnInactivity(time::Duration::days(7)))
         .with_path("/");
 
