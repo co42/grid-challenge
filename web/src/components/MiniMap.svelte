@@ -1,6 +1,6 @@
 <script>
   import maplibregl from 'maplibre-gl';
-  import { STYLE_URL, hideBuiltinTrails } from '../lib/map.js';
+  import { getStyleUrl, hideBuiltinTrails } from '../lib/map.js';
 
   /**
    * @prop {object} [polygon] - GeoJSON Polygon to display and fit
@@ -17,101 +17,108 @@
   $effect(() => {
     if (!container) return;
 
-    const m = new maplibregl.Map({
-      container,
-      style: STYLE_URL,
-      center: [6.1, 45.9],
-      zoom: 10,
-      interactive: false,
-      attributionControl: false,
-    });
+    let m;
+    let cancelled = false;
 
-    m.on('load', () => {
-      hideBuiltinTrails(m);
-      // Collect bounds from polygon and/or track
-      const bounds = new maplibregl.LngLatBounds();
-      let hasBounds = false;
+    getStyleUrl().then((styleUrl) => {
+      if (cancelled) return;
+      m = new maplibregl.Map({
+        container,
+        style: styleUrl,
+        center: [6.1, 45.9],
+        zoom: 10,
+        interactive: false,
+        attributionControl: false,
+      });
 
-      // Normalize polygon: accept GeoJSON Polygon or plain [[lon,lat],...] array
-      const polyGeoJSON =
-        polygon?.type === 'Polygon'
-          ? polygon
-          : Array.isArray(polygon) && polygon.length >= 3
-            ? { type: 'Polygon', coordinates: [polygon.concat([polygon[0]])] }
-            : null;
+      m.on('load', () => {
+        hideBuiltinTrails(m);
+        // Collect bounds from polygon and/or track
+        const bounds = new maplibregl.LngLatBounds();
+        let hasBounds = false;
 
-      if (polyGeoJSON?.coordinates?.[0]) {
-        const coords = polyGeoJSON.coordinates[0];
-        // World-bounds mask: dims everything outside the polygon
-        const world = [
-          [-180, -90],
-          [180, -90],
-          [180, 90],
-          [-180, 90],
-          [-180, -90],
-        ];
-        const maskData = {
-          type: 'Feature',
-          geometry: { type: 'Polygon', coordinates: [world, coords] },
-        };
-        m.addSource('polygon-mask', { type: 'geojson', data: maskData });
-        m.addLayer({
-          id: 'polygon-mask',
-          type: 'fill',
-          source: 'polygon-mask',
-          paint: { 'fill-color': '#f8fafc', 'fill-opacity': 0.45 },
-        });
+        // Normalize polygon: accept GeoJSON Polygon or plain [[lon,lat],...] array
+        const polyGeoJSON =
+          polygon?.type === 'Polygon'
+            ? polygon
+            : Array.isArray(polygon) && polygon.length >= 3
+              ? { type: 'Polygon', coordinates: [polygon.concat([polygon[0]])] }
+              : null;
 
-        // Outline
-        const outlineData = {
-          type: 'Feature',
-          geometry: { type: 'Polygon', coordinates: [coords] },
-        };
-        m.addSource('polygon-outline', { type: 'geojson', data: outlineData });
-        m.addLayer({
-          id: 'polygon-outline',
-          type: 'line',
-          source: 'polygon-outline',
-          paint: { 'line-color': '#475569', 'line-width': 1.5, 'line-opacity': 0.6 },
-        });
+        if (polyGeoJSON?.coordinates?.[0]) {
+          const coords = polyGeoJSON.coordinates[0];
+          // World-bounds mask: dims everything outside the polygon
+          const world = [
+            [-180, -90],
+            [180, -90],
+            [180, 90],
+            [-180, 90],
+            [-180, -90],
+          ];
+          const maskData = {
+            type: 'Feature',
+            geometry: { type: 'Polygon', coordinates: [world, coords] },
+          };
+          m.addSource('polygon-mask', { type: 'geojson', data: maskData });
+          m.addLayer({
+            id: 'polygon-mask',
+            type: 'fill',
+            source: 'polygon-mask',
+            paint: { 'fill-color': '#f8fafc', 'fill-opacity': 0.45 },
+          });
 
-        for (const [lon, lat] of coords) {
-          bounds.extend([lon, lat]);
-          hasBounds = true;
-        }
-      }
+          // Outline
+          const outlineData = {
+            type: 'Feature',
+            geometry: { type: 'Polygon', coordinates: [coords] },
+          };
+          m.addSource('polygon-outline', { type: 'geojson', data: outlineData });
+          m.addLayer({
+            id: 'polygon-outline',
+            type: 'line',
+            source: 'polygon-outline',
+            paint: { 'line-color': '#475569', 'line-width': 1.5, 'line-opacity': 0.6 },
+          });
 
-      if (track?.coordinates?.length) {
-        m.addSource('track', { type: 'geojson', data: track });
-        m.addLayer({
-          id: 'track-line',
-          type: 'line',
-          source: 'track',
-          paint: { 'line-color': '#f97316', 'line-width': 2, 'line-opacity': 0.9 },
-          layout: { 'line-cap': 'round', 'line-join': 'round' },
-        });
-        for (const line of track.coordinates) {
-          for (const [lon, lat] of line) {
+          for (const [lon, lat] of coords) {
             bounds.extend([lon, lat]);
             hasBounds = true;
           }
         }
-      }
 
-      if (hasBounds) {
-        // Defer fitBounds until container has its final CSS-driven size
-        requestAnimationFrame(() => {
-          m.resize();
-          m.fitBounds(bounds, { padding: 8, animate: false });
+        if (track?.coordinates?.length) {
+          m.addSource('track', { type: 'geojson', data: track });
+          m.addLayer({
+            id: 'track-line',
+            type: 'line',
+            source: 'track',
+            paint: { 'line-color': '#f97316', 'line-width': 2, 'line-opacity': 0.9 },
+            layout: { 'line-cap': 'round', 'line-join': 'round' },
+          });
+          for (const line of track.coordinates) {
+            for (const [lon, lat] of line) {
+              bounds.extend([lon, lat]);
+              hasBounds = true;
+            }
+          }
+        }
+
+        if (hasBounds) {
+          // Defer fitBounds until container has its final CSS-driven size
+          requestAnimationFrame(() => {
+            m.resize();
+            m.fitBounds(bounds, { padding: 8, animate: false });
+            ready = true;
+          });
+        } else {
           ready = true;
-        });
-      } else {
-        ready = true;
-      }
+        }
+      });
     });
 
     return () => {
-      m.remove();
+      cancelled = true;
+      m?.remove();
     };
   });
 </script>

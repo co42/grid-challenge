@@ -29,8 +29,10 @@
   let map = $state(null);
 
   onMount(() => {
-    map = createMap(mapContainer);
-    map.on('load', () => loadChallenge());
+    createMap(mapContainer).then((m) => {
+      map = m;
+      map.on('load', () => loadChallenge());
+    });
     return () => map?.remove();
   });
 

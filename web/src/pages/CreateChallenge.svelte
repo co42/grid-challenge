@@ -22,9 +22,11 @@
   let previewTimeout;
 
   onMount(() => {
-    map = createMap(mapContainer, { zoom: 12 });
-    map.on('load', () => {
-      mapReady = true;
+    createMap(mapContainer, { zoom: 12 }).then((m) => {
+      map = m;
+      map.on('load', () => {
+        mapReady = true;
+      });
     });
     return () => map?.remove();
   });

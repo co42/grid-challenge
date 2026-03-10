@@ -55,8 +55,10 @@
   let previewTimeout;
 
   onMount(() => {
-    map = createMap(mapContainer);
-    map.on('load', () => loadChallenge());
+    createMap(mapContainer).then((m) => {
+      map = m;
+      map.on('load', () => loadChallenge());
+    });
     return () => map?.remove();
   });
 

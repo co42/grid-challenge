@@ -2,8 +2,20 @@ import maplibregl from 'maplibre-gl';
 
 const DEFAULT_CENTER = [6.1, 45.9]; // Alps default
 const DEFAULT_ZOOM = 10;
-const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY || '';
-export const STYLE_URL = `https://api.maptiler.com/maps/outdoor-v2/style.json?key=${MAPTILER_KEY}`;
+let _styleUrl = null;
+
+/** Fetch the MapTiler style URL (key comes from backend at runtime). */
+export async function getStyleUrl() {
+  if (_styleUrl) return _styleUrl;
+  try {
+    const res = await fetch('/api/config');
+    const { maptiler_key } = await res.json();
+    _styleUrl = `https://api.maptiler.com/maps/outdoor-v2/style.json?key=${maptiler_key || ''}`;
+  } catch {
+    _styleUrl = 'https://api.maptiler.com/maps/outdoor-v2/style.json?key=';
+  }
+  return _styleUrl;
+}
 
 // Layers to always hide
 const HIDDEN_LAYERS = [
@@ -43,10 +55,11 @@ export function hideBuiltinTrails(map) {
   }
 }
 
-export function createMap(container, options = {}) {
+export async function createMap(container, options = {}) {
+  const style = await getStyleUrl();
   const map = new maplibregl.Map({
     container,
-    style: STYLE_URL,
+    style,
     center: options.center || DEFAULT_CENTER,
     zoom: options.zoom || DEFAULT_ZOOM,
   });

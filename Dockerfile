@@ -1,6 +1,5 @@
 # Stage 1: Build frontend
 FROM node:22-alpine AS frontend
-ARG VITE_MAPTILER_KEY
 WORKDIR /app/web
 COPY web/package.json web/package-lock.json ./
 RUN npm ci

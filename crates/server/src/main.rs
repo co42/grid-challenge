@@ -125,7 +125,10 @@ async fn main() -> anyhow::Result<()> {
     let spa_dir = PathBuf::from("web/dist");
     let spa = ServeDir::new(&spa_dir).fallback(ServeFile::new(spa_dir.join("index.html")));
 
-    let app = Router::new().nest("/api", api).fallback_service(spa);
+    let app = Router::new()
+        .nest("/api", api)
+        .route("/api/config", axum::routing::get(config))
+        .fallback_service(spa);
 
     let port = std::env::var("PORT").unwrap_or_else(|_| "3000".into());
     let bind = format!("0.0.0.0:{port}");
@@ -134,6 +137,12 @@ async fn main() -> anyhow::Result<()> {
     axum::serve(listener, app).await?;
 
     Ok(())
+}
+
+/// Public config endpoint — returns non-secret runtime configuration.
+async fn config() -> axum::Json<serde_json::Value> {
+    let maptiler_key = std::env::var("MAPTILER_KEY").unwrap_or_default();
+    axum::Json(serde_json::json!({ "maptiler_key": maptiler_key }))
 }
 
 /// Load .env file into environment. Doesn't override existing vars.
