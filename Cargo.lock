@@ -622,7 +622,7 @@ dependencies = [
 
 [[package]]
 name = "grid-challenge-core"
-version = "1.2.0"
+version = "1.2.1"
 dependencies = [
  "anyhow",
  "geo",
@@ -637,7 +637,7 @@ dependencies = [
 
 [[package]]
 name = "grid-challenge-server"
-version = "1.2.0"
+version = "1.2.1"
 dependencies = [
  "anyhow",
  "argon2",
